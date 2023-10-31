@@ -4,7 +4,7 @@ timescale 1ns / 1ps
 // Engineer: yt 
 //
 // Create Date: 10/28/2023
-// Design Name: Display
+// Design Name: Graphics
 // Module Name: textdisplay
 // Project Name: FPGA -Doom
 // Target Devices:
@@ -41,7 +41,7 @@ module textdisplay(
 		.rgb_text(rgb_next)
 	);
 
-	textgen text_control_unit(
+	gametext text_out(
 		.clk(clk),
 		.video_on(video_on),
 		.pixel_x(pixel_x),

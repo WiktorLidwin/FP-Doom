@@ -4,7 +4,7 @@ timescale 1ns / 1ps
 // Engineer: yt 
 //
 // Create Date: 10/28/2023
-// Design Name: Display
+// Design Name: Graphics
 // Module Name: displaytest
 // Project Name: FPGA -Doom
 // Target Devices:
