@@ -32,11 +32,20 @@ module game_top(
 
     // todo game FSM:
     // if none 00, chill for a second, then go to start menu 01 . if button driver OR returns, move into playing game 11. if SOMETHING move to game over 10 for 2 seconds. then return to new game.
-    // if reset ever pressed go to 00.
+    // if reset ever pressed go to 00. 
+
+    // todo STARTMENU:
+    	// text, initialize ray caster
 
     // todo PLAYGAME:
+    // initialize game timer, display game timer
     // movement and enemy spawning.
     // update raycaster from movement?
+
+    //todo GAMEOVER:
+    // end game timer
+    // display game over and timer
+    // stop ray casting updates, maybe make screen red?
 
     // todo DISPLAY:
     // depending on state, set text display. from ray caster and text, output RGB to VGA.
