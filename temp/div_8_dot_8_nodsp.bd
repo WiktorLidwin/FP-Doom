@@ -1,0 +1,154 @@
+{
+  "design": {
+    "design_info": {
+      "boundary_crc": "0x639483EA32FF9354",
+      "device": "xc7a100tcsg324-1",
+      "name": "div_8_dot_8_nodsp",
+      "synth_flow_mode": "Hierarchical",
+      "tool_version": "2019.1",
+      "validated": "true"
+    },
+    "design_tree": {
+      "div_gen_0": ""
+    },
+    "ports": {
+      "clk_100MHz": {
+        "type": "clk",
+        "direction": "I",
+        "parameters": {
+          "CLK_DOMAIN": {
+            "value": "div_8_dot_8_nodsp_clk_100MHz",
+            "value_src": "default"
+          },
+          "FREQ_HZ": {
+            "value": "100000000"
+          },
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "PHASE": {
+            "value": "0.000",
+            "value_src": "default"
+          }
+        }
+      },
+      "s_axis_divisor_tvalid": {
+        "direction": "I"
+      },
+      "s_axis_dividend_tvalid": {
+        "direction": "I"
+      },
+      "s_axis_dividend_tdata": {
+        "direction": "I",
+        "left": "23",
+        "right": "0"
+      },
+      "s_axis_divisor_tdata": {
+        "type": "data",
+        "direction": "I",
+        "left": "15",
+        "right": "0",
+        "parameters": {
+          "LAYERED_METADATA": {
+            "value": "undef",
+            "value_src": "default"
+          }
+        }
+      },
+      "s_axis_divisor_tready": {
+        "direction": "O"
+      },
+      "m_axis_dout_tvalid": {
+        "direction": "O"
+      },
+      "m_axis_dout_tdata": {
+        "direction": "O",
+        "left": "39",
+        "right": "0"
+      },
+      "s_axis_dividend_tready": {
+        "direction": "O"
+      }
+    },
+    "components": {
+      "div_gen_0": {
+        "vlnv": "xilinx.com:ip:div_gen:5.1",
+        "xci_name": "div_8_dot_8_nodsp_div_gen_0_0",
+        "parameters": {
+          "clocks_per_division": {
+            "value": "4"
+          },
+          "dividend_and_quotient_width": {
+            "value": "24"
+          },
+          "fractional_width": {
+            "value": "16"
+          },
+          "latency": {
+            "value": "45"
+          },
+          "remainder_type": {
+            "value": "Fractional"
+          }
+        }
+      }
+    },
+    "nets": {
+      "s_axis_divisor_tvalid_1": {
+        "ports": [
+          "s_axis_divisor_tvalid",
+          "div_gen_0/s_axis_divisor_tvalid"
+        ]
+      },
+      "s_axis_dividend_tvalid_1": {
+        "ports": [
+          "s_axis_dividend_tvalid",
+          "div_gen_0/s_axis_dividend_tvalid"
+        ]
+      },
+      "s_axis_dividend_tdata_1": {
+        "ports": [
+          "s_axis_dividend_tdata",
+          "div_gen_0/s_axis_dividend_tdata"
+        ]
+      },
+      "s_axis_divisor_tdata_1": {
+        "ports": [
+          "s_axis_divisor_tdata",
+          "div_gen_0/s_axis_divisor_tdata"
+        ]
+      },
+      "div_gen_0_m_axis_dout_tvalid": {
+        "ports": [
+          "div_gen_0/m_axis_dout_tvalid",
+          "m_axis_dout_tvalid"
+        ]
+      },
+      "div_gen_0_m_axis_dout_tdata": {
+        "ports": [
+          "div_gen_0/m_axis_dout_tdata",
+          "m_axis_dout_tdata"
+        ]
+      },
+      "div_gen_0_s_axis_dividend_tready": {
+        "ports": [
+          "div_gen_0/s_axis_dividend_tready",
+          "s_axis_dividend_tready"
+        ]
+      },
+      "div_gen_0_s_axis_divisor_tready": {
+        "ports": [
+          "div_gen_0/s_axis_divisor_tready",
+          "s_axis_divisor_tready"
+        ]
+      },
+      "clk_100MHz_1": {
+        "ports": [
+          "clk_100MHz",
+          "div_gen_0/aclk"
+        ]
+      }
+    }
+  }
+}
