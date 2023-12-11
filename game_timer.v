@@ -5,7 +5,7 @@
 // 
 // Create Date: 11/30/2023
 // Design Name: 
-// Module Name: gameover_timer
+// Module Name: game_timer
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -18,7 +18,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module gameover_timer(
+module game_timer(
     input wire clk, reset,
     input wire timer_start, timer_tick,
     output wire timer_done,

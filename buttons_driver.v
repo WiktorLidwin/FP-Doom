@@ -21,9 +21,9 @@
 
 module buttons_driver(
     input A, B, C, 
-    output reg rotateN90_press, //A
-    output reg forward_press, //B
-    output reg rotate90_press, //C
+    output reg rotateCCW, //A
+    output reg forward, //B
+    output reg rotateCW, //C
     output reg pressed
     );
 
@@ -32,34 +32,34 @@ module buttons_driver(
       case({A, B, C})
       	3'b000: begin
       		//none
-      		rotateN90_press = 1'b0;
-		forward_press = 1'b0;
-		rotate90_press = 1'b0;
+      		rotateCCW = 1'b0;
+		forward = 1'b0;
+		rotateCW = 1'b0;
 		pressed = 1'b0;
 	end
         3'b001: begin
-        	rotateN90_press = 1'b0; // C
-        	forward_press = 1'b0;
-        	rotate90_press = 1'b1;
+        	rotateCCW = 1'b0; // C
+        	forward = 1'b0;
+        	rotateCW = 1'b1;
         	pressed = 1'b1;
 	end
         3'b010: begin
-        	rotateN90_press = 1'b0;
-        	forward_press = 1'b1; // B
-        	rotate90_press = 1'b0;
+        	rotateCCW = 1'b0;
+        	forward = 1'b1; // B
+        	rotateCW = 1'b0;
         	pressed = 1'b1;
         end
         3'b100: begin
-        	rotateN90_press = 1'b1; //A
-        	forward_press = 1'b0;
-        	rotate90_press = 1'b0;
+        	rotateCCW = 1'b1; //A
+        	forward = 1'b0;
+        	rotateCW = 1'b0;
         	pressed = 1'b1;
         end
         default: begin
         	//multiple pressed
-        	rotateN90_press = 1'b0;
-        	forward_press = 1'b0;
-        	rotate90_press = 1'b0;
+        	rotateCCW = 1'b0;
+        	forward = 1'b0;
+        	rotateCW = 1'b0;
         	pressed = 1'b1;
         end
       endcase
