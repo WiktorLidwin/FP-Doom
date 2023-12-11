@@ -20,24 +20,49 @@
 
 
 module buttons_driver(
-    input A, B, C;
-    output wire [1:0] rotateN90_press; //A
-    output wire [1:0] forward_press; //B
-    output wire [1:0] rotate90_press; //C
+    input A, B, C, 
+    output reg rotateN90_press, //A
+    output reg forward_press, //B
+    output reg rotate90_press, //C
+    output reg pressed
     );
 
     always @* begin
       //check if only one
       case({A, B, C})
-        3'b001: rotateN90_press = 1'b1; // A
-        3'b010: forward_press = 1'b1; // B
-        3'b100: rotate90_press = 1'b1; // C
+      	3'b000: begin
+      		//none
+      		rotateN90_press = 1'b0;
+		forward_press = 1'b0;
+		rotate90_press = 1'b0;
+		pressed = 1'b0;
+	end
+        3'b001: begin
+        	rotateN90_press = 1'b0; // C
+        	forward_press = 1'b0;
+        	rotate90_press = 1'b1;
+        	pressed = 1'b1;
+	end
+        3'b010: begin
+        	rotateN90_press = 1'b0;
+        	forward_press = 1'b1; // B
+        	rotate90_press = 1'b0;
+        	pressed = 1'b1;
+        end
+        3'b100: begin
+        	rotateN90_press = 1'b1; //A
+        	forward_press = 1'b0;
+        	rotate90_press = 1'b0;
+        	pressed = 1'b1;
+        end
         default: begin
-        	//reset if none or multiple pressed
+        	//multiple pressed
         	rotateN90_press = 1'b0;
         	forward_press = 1'b0;
         	rotate90_press = 1'b0;
-    endcase
+        	pressed = 1'b1;
+        end
+      endcase
   end
 
 endmodule

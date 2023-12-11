@@ -25,30 +25,73 @@ module game_top(
     output RGB; //todo make this correct
     );
 
-    localparam [1:0] state;
+    //game states
+    localparam [1:0] 
+    	newgame = 2'b00,
+    	play = 2'b01,
+    	over = 2'b11;
+
+    reg [1:0] state_reg, state_next;
 
     //todo declare input variables for module instatiation
-    //todo connect vga, connect raycaster, connect text, connect movement, connect input_drivers
+    //todo connect vga, connect raycaster, connect text, connect movement, connect input_drivers. timer
 
-    // todo game FSM:
-    // if none 00, chill for a second, then go to start menu 01 . if button driver OR returns, move into playing game 11. if SOMETHING move to game over 10 for 2 seconds. then return to new game.
-    // if reset ever pressed go to 00. 
-
-    // todo STARTMENU:
-    	// text, initialize ray caster
-
-    // todo PLAYGAME:
-    // initialize game timer, display game timer
-    // movement and enemy spawning.
-    // update raycaster from movement?
-
-    //todo GAMEOVER:
-    // end game timer
-    // display game over and timer
-    // stop ray casting updates, maybe make screen red?
-
-    // todo DISPLAY:
-    // depending on state, set text display. from ray caster and text, output RGB to VGA.
-
+    // FSM for game logic
+    // state logic
+    always @(posedge clk, posedge reset)
+    	if (reset) begin
+    		state_reg <= newgame;
+    		rgb_reg <= 0;
+    	end
+	else begin
+		state_reg <= state_next;
+		if (pixel_tick)
+			rgb_reg <= rgb_next;
+		end
+     //states
+     always @* begin
+     	timer_start = 1'b0;
+     	state_next = state_reg;
+     	case (state_reg)
+     		newgame: begin
+     			//reset data here
+     			//clear timers
+     			//show game text
+     			//initialize raycaster
+     			if (btn != 2'b00) begin //if button pressed, go to game
+     					state_next = play;
+     					// clear text?
+			end
+		play: begin
+			// initialize game timer
+			// display game tiemr,
+			// if button pressed, movement
+			// update raycaster from movement
+		end
+		over: begin
+			//chill for two seconds before next state
+			if (timer_up)
+				state_next = newgame;
+				//stop raycasting updates
+		end
+	endcase
+    end
+    //display of graphics and text
+    //todo ray caster and text, change text ons. 
+    always @* 
+    	if (~video_on)
+    		rgb_next = "000" //blank at edges
+    	else
+    		// show start menu at beginning, show gameover at end
+    		//TODO check text_on
+    		if (text_on[3] || state_reg == newgame && text_on[1] || sate_reg == over && text_on[0]))
+			rgb_next = text_rgb
+		else if (graph_on)
+			rgb_next = graph_rgb
+		else if (text_on[2]) //display logo TODO remove?
+			rgb_next = text_rgb;
+		else
+			rgb_next = 3'b1000; //background
+	assign rgb = rgb_reg;
 endmodule
 

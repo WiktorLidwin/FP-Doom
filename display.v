@@ -1,4 +1,4 @@
-timescale 1ns / 1ps
+`timescale 1ns / 1ps
 ///////////////////////
 // Company: ec551
 // Engineer: yt
@@ -37,8 +37,8 @@ module display(
 	localparam HF = 48; // left border
 	localparam HB = 16; // right border
 	localparam HR = 96; // horizontal retrace
-	localparam VD = 480; // verical count
-	localparam VF = 10l // top border
+	localparam VD = 480; // vertical count
+	localparam VF = 101; // top border
 	localparam VB = 33; // bottom border
 	localparam VR = 2; // retrace
 
@@ -110,8 +110,8 @@ module display(
 	assign video_on = (h_count_reg<HD)&&(v_count_reg<VD);
 
 	//output
-	assign hsync = h_sync_reg
-	assign vsynch = v_sync_reg;
+	assign hsync = h_sync_reg;
+	assign vsync = v_sync_reg;
 	assign pixel_x = h_count_reg;
 	assign pixel_y = v_count_reg;
 	assign p_tick = pixel_tick;
