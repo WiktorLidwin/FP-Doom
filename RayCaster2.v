@@ -23,7 +23,7 @@
 module RayCaster2(
     input clk,
     input rst,
-
+     
     input [8:0] x, // camera X position
     input [79:0] angle, // directional position
 
@@ -75,20 +75,22 @@ module RayCaster2(
     
     // divider
     reg div_valid;
-    wire div_out_valid, div_ready;
+    wire div_out_valid, div_ready, dividen_ready;
     reg [23:0] dividend;
     reg [15:0] divisor;
     reg [15:0] divisor_hold;
     reg [15:0] divres_hold;
     wire [39:0] div_result;
     div_8_dot_8_nodsp div (
-        .aclk(clk),
+        .clk_100MHz(clk),
         .s_axis_divisor_tvalid(div_valid),
         .s_axis_dividend_tvalid(div_valid),
-        .m_axis_dout_tvalid(div_out_valid),
+        
         .s_axis_dividend_tdata(dividend),
         .s_axis_divisor_tdata(divisor),
         .s_axis_divisor_tready(div_ready),
+        
+        .m_axis_dout_tvalid(div_out_valid),
         .m_axis_dout_tdata(div_result)
     );
     
@@ -175,6 +177,13 @@ module RayCaster2(
     
     
     
+    initial begin
+            busy = 1'b0;
+            done = 1'b0;
+    end
+    
+    
+    
     
     
     
@@ -233,6 +242,7 @@ module RayCaster2(
         case (state_q)
             IDLE: begin
                 busy = 1'b0;
+
                 if (start) begin
                    map_pos_x_d = map_pos_x;
                    map_pos_y_d = map_pos_y;
@@ -287,50 +297,50 @@ module RayCaster2(
                 // divider becomes ready, so we don't have to wait for the full
                 // delay twice.
                 if (div_ready && !cdelta_q[2]) begin
-                    if (!cdelta_q[0]) begin
-                        divisor_hold = raydir_x_q;
-                        cdelta_d[0] = 1'b1;
-                    end else begin
-                        divisor_hold = raydir_y_q;
-                        // all divisions queued.
-                        cdelta_d[2] = 1'b1;
-                    end
-    
-                    // avoid divide by zero.
-                    if (divisor_hold != 16'd0) begin
-                        divisor = divisor_hold;
-                    end else begin
-                        // TODO: Can skip the division in this case since we
-                        // divisor/dividend are both static.
-                        divisor = 16'd00_01;
-                    end
-                    div_valid = 1'b1;
+                if (!cdelta_q[0]) begin
+                    divisor_hold = raydir_x_q;
+                    cdelta_d[0] = 1'b1;
+                end else begin
+                    divisor_hold = raydir_y_q;
+                    // all divisions queued.
+                    cdelta_d[2] = 1'b1;
                 end
-    
-                // divisions come home to roost.
-                if (div_out_valid) begin
-                    // handle special cases where we overflow our 16bit results.
-                    // the division is 24bit so we can detect this situation.
-                    if (div_result[31:16] == 16'd0) begin
-                        // to infinity, and beyond!
-                        if (div_result[39]) begin // negative max
-                            divres_hold = 16'h8000;
-                        end else begin // positive max
-                            divres_hold = 16'h7FFF;
-                        end
-                    end else begin
-                        divres_hold = div_result[31:16];
-                    end
-    
-                    if (!cdelta_q[1]) begin
-                        delta_dist_n_x_d = divres_hold;
-                        cdelta_d[1] = 1'b1;
-                    end else begin
-                        delta_dist_n_y_d = divres_hold;
-                        // all divisions are done. resume processing.
-                        state_d = START_CAST;
-                    end
+
+                // avoid divide by zero.
+                if (divisor_hold != 16'd0) begin
+                    divisor = divisor_hold;
+                end else begin
+                    // TODO: Can skip the division in this case since we
+                    // divisor/dividend are both static.
+                    divisor = 16'd00_01;
                 end
+                div_valid = 1'b1;
+            end
+
+            // divisions come home to roost.
+            if (div_out_valid) begin
+                // handle special cases where we overflow our 16bit results.
+                // the division is 24bit so we can detect this situation.
+                if (div_result[31:16] == 16'd0) begin
+                    // to infinity, and beyond!
+                    if (div_result[39]) begin // negative max
+                        divres_hold = 16'h8000;
+                    end else begin // positive max
+                        divres_hold = 16'h7FFF;
+                    end
+                end else begin
+                    divres_hold = div_result[31:16];
+                end
+
+                if (!cdelta_q[1]) begin
+                    delta_dist_n_x_d = divres_hold;
+                    cdelta_d[1] = 1'b1;
+                end else begin
+                    delta_dist_n_y_d = divres_hold;
+                    // all divisions are done. resume processing.
+                    state_d = START_CAST;
+                end
+            end
             end
             START_CAST: begin
                 // keep positive values of delta distance
@@ -440,14 +450,21 @@ module RayCaster2(
                     mul_arg2_d = raydir_x_q;
                 end
                 state_d = MULTIPLY;
-                next_state_d = DRAW_LINE_GO;;
+                next_state_d = DRAW_LINE_GO;
             end
             
             DRAW_LINE_GO: begin
                 line_height_d = line_height_read;
                 // line_height_q and texture_x_q should be correct now.
-                state_d = IDLE;
+                state_d = WAIT_LINE;
+                
+            end
+            WAIT_LINE : begin
                 done = 1'b1;
+                busy = 1'b0;
+                if(start)begin
+                    state_d = IDLE;
+                end
             end
             default: begin
                 state_d = IDLE;
@@ -496,6 +513,7 @@ module RayCaster2(
             line_height_q <= line_height_d;
             map_pos_x_q <= map_pos_x_d;
             map_pos_y_q <= map_pos_y_d;
+            
         end
         raydir_x_q <= raydir_x_d;
         raydir_y_q <= raydir_y_d;
