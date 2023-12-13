@@ -20,10 +20,12 @@
 
 module game_top(
     input  A, B, C;
-    input wire clk, reset;
+    input wire clk, RST;
     output wire hsync, vsync;
     output wire [3:0] red, green, blue
     );
+
+    wire reset = ~RST; // reset is active low on nexys
 
     //game states
     localparam [1:0]
@@ -37,7 +39,10 @@ module game_top(
     //todo declare input variables for module instatiation
     //todo connect raycaster, connect movement
 
-   // display variables / subsystem
+
+    //raycaster
+
+   // display variables
     wire video_on, p_tick;
     wire pix_x, pix_y;
     wire [3:0] text_on, text_red, text_blue, text_green;
