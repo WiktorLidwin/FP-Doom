@@ -37,7 +37,7 @@ initial begin
 end
 
 always @(*) begin
-    if (addr < 9'd320)
+    if (addr < 16'd640)
         cx_d = camerax_pos[addr];
     else
         cx_d = 16'd0;

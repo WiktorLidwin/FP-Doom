@@ -19,7 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
 module Top(
         input wire CLK,             // board clock: 100 MHz on Arty/Basys3/Nexys
         input wire RST_BTN,    
@@ -47,7 +46,7 @@ module Top(
    reg [31:0] counter; // 27-bit counter to divide 100MHz to 30Hz
     reg clk_30Hz;
   always @(posedge CLK) begin
-    if (counter == 32'd8888880) begin // Adjust this value for more accurate division
+    if (counter == 32'd3333333) begin // Adjust this value for more accurate division
       counter <= 0;
       clk_30Hz <= ~clk_30Hz;
     end else begin
@@ -75,18 +74,79 @@ module Top(
     
     
     
-    
-    
-    
+
     wire [79:0] angle;
     
     reg [15:0] map_pos_x;
     reg [15:0] map_pos_y;
     
-    
+    wire [7:0] map_rom_x, map_rom_y;
+//    assign map_rom_x = map_pos_x[15:8];
+//    assign map_rom_y = map_pos_y[15:8];
+//    wire [3:0] map_point;
+//    map_rom map_rom (
+//        .x(map_rom_x),
+//        .y(map_rom_y),
+//        .point(map_point)
+//    );
     
     
 //    wire [8:0] camera_x;
+    
+    reg [3:0] map [5:0][5:0];
+
+    initial begin
+        map[0][0] = 4'd 1;
+        map[0][1] = 4'd 1;
+        map[0][2] = 4'd 1;
+        map[0][3] = 4'd 1;
+        map[0][4] = 4'd 1;
+        map[0][5] = 4'd 1;
+        
+        map[1][0] = 4'd 1;
+        map[1][1] = 4'd 0;
+        map[1][2] = 4'd 0;
+        map[1][3] = 4'd 0;
+        map[1][4] = 4'd 0;
+        map[1][5] = 4'd 1;
+        
+        map[2][0] = 4'd 1;
+        map[2][1] = 4'd 0;
+        map[2][2] = 4'd 0;
+        map[2][3] = 4'd 0;
+        map[2][4] = 4'd 0;
+        map[2][5] = 4'd 1;
+        
+        map[3][0] = 4'd 1;
+        map[3][1] = 4'd 0;
+        map[3][2] = 4'd 0;
+        map[3][3] = 4'd 0;
+        map[3][4] = 4'd 0;
+        map[3][5] = 4'd 1;
+        
+        map[4][0] = 4'd 1;
+        map[4][1] = 4'd 0;
+        map[4][2] = 4'd 0;
+        map[4][3] = 4'd 0;
+        map[4][4] = 4'd 1;
+        
+        map[5][0] = 4'd 1;
+        map[5][1] = 4'd 1;
+        map[5][2] = 4'd 1;
+        map[5][3] = 4'd 1;
+        map[5][4] = 4'd 1;
+        map[5][5] = 4'd 1;
+    end
+    
+//    always @(*) begin
+//        if (x < 6 && y < 6)
+//            point = map[x][y];
+//        else
+//            point = 4'd1;
+//    end
+    
+    
+    
     
     wire cast_busy;
     wire cast_done;
@@ -99,6 +159,27 @@ module Top(
         angle_addr = 7'd0;
         start = 1;
     end
+    
+        reg shooting;
+      reg shooting_delay;
+      
+	reg [5:0] shooting_counter;
+  initial begin
+	shooting = 0;
+	shooting_delay = 0;
+
+	shooting_counter = 0;
+	
+  end
+  wire [15:0] calculated_x_plus_bound;
+    assign calculated_x_plus_bound = (map_pos_x + 300);
+    wire [15:0] calculated_x_neg_bound;
+    assign calculated_x_neg_bound = (map_pos_x - 300);
+    wire [15:0] calculated_y_plus_bound;
+    assign calculated_y_plus_bound = (map_pos_y + 300);
+    wire [15:0] calculated_y_neg_bound;
+    assign calculated_y_neg_bound = (map_pos_y + 300);
+    
     always @(posedge clk_30Hz) begin
 //        angle_addr <= angle_addr + 1'b1;
         if(swt[0] == 1)begin 
@@ -108,17 +189,49 @@ module Top(
             angle_addr = angle_addr - 1'b1;
         end
         if(swt[2] == 1)begin 
-            map_pos_x = map_pos_x + 4'd8;
+            if (calculated_x_plus_bound[15:8] > 0 && calculated_x_plus_bound[15:8] < 6 && map[calculated_x_plus_bound[15:8]][map_pos_y[15:8]] == 0) begin
+                map_pos_x = map_pos_x + 4'd8;
+            end
         end
         if(swt[3] == 1)begin 
-            map_pos_x = map_pos_x - 4'd8;
+            
+            if (calculated_x_neg_bound[15:8] > 0 && calculated_x_neg_bound[15:8] < 6 &&  map[calculated_x_neg_bound[15:8]][map_pos_y[15:8]] == 0) begin
+                map_pos_x = map_pos_x - 4'd8;
+            end
         end
         if(swt[4] == 1)begin 
-            map_pos_y = map_pos_y + 4'd8;
+            
+            if (calculated_y_plus_bound[15:8] > 0 && calculated_y_plus_bound[15:8] < 6 && map[map_pos_x[15:8]][calculated_y_plus_bound[15:8]] == 0) begin
+                map_pos_y = map_pos_y + 4'd8;
+            end
         end
         if(swt[5] == 1)begin 
-            map_pos_y = map_pos_y - 4'd8;
+            if (calculated_y_neg_bound[15:8] > 0 && calculated_y_neg_bound[15:8] < 6 && map[map_pos_x[15:8]][calculated_y_neg_bound[15:8]] == 0) begin
+                map_pos_y = map_pos_y - 4'd8;
+            end
         end
+        if(swt[7] == 1)begin 
+            if(!shooting && !shooting_delay) begin
+            shooting = 1;
+            //todo
+            end
+        end
+        if(shooting) begin 
+            shooting_counter = shooting_counter + 1;
+            if(shooting_counter >= 30) begin
+                shooting_counter = 0;
+                shooting = 0;
+                shooting_delay = 1;
+            end
+            end
+        else if(shooting_delay) begin
+            shooting_counter = shooting_counter + 1;
+            if(shooting_counter >= 30) begin
+                shooting_counter = 0;
+                shooting = 0;
+                shooting_delay = 0;
+            end
+	    end
     end
         
     angle_rom angle_rom (
@@ -153,6 +266,7 @@ module Top(
         .map_pos_x(map_pos_x),
         .map_pos_y(map_pos_y),
         .start(start),
+        .shot(shooting),
         .busy(cast_busy),
         .done(cast_done),
         .line_height(line_height),
@@ -216,7 +330,7 @@ module Top(
                         camera_x_q <= camera_x_q + 1'b1;
                      end  
              
-             if (counter2 > 320)begin
+             if (counter2 > WIDTH)begin
                 counter2 = 0;
                 
              end else begin
@@ -253,14 +367,14 @@ module Top(
 //          end
 //    end
     
-    reg red, green,blue;
+    reg [3:0] red, green,blue;
     
-     assign VGA_R[3] = red;
+     assign VGA_R = red;
        
-     assign VGA_G[3] = green;
+     assign VGA_G = green;
      
      
-      assign VGA_B[3] = blue;
+      assign VGA_B = blue;
     reg current_line_height;
     always @ (x, y)
       begin 
@@ -272,18 +386,40 @@ module Top(
 
          if((x < WIDTH) & (y < HEIGHT))
             begin
+		
+		if(shooting && (y < 100) && (y > 140) &&(x>140) &&(x< 180)) begin
+			//TODO load rom
+			red = 4'd15;
+		end
+	
+        else if (frame_buffer[x][11:4] > y) begin 
+			red = 4'd3;
+			blue = 4'd3;
+			green = 4'd3;
 
-                
-                 if ((frame_buffer[x][11:4] < y) & (y <frame_buffer[x][19:12] ) )begin
+		end
+		else if (y > frame_buffer[x][19:12] ) begin
+			red = 4'd7;
+			blue = 4'd7;
+			green = 4'd7;	
+		end
+		//if ((frame_buffer[x][11:4] < y) & (y <frame_buffer[x][19:12] ) )
+        else begin
                     case(frame_buffer[x][3:0])
                         4'b0001:begin
-                            red = 1;
+                            	red = 4'd1;
+				blue = 4'd9;
+				green = 4'd0;	
                         end
                         4'b0010:begin
-                            green = 1;
+                        red = 4'd11;
+				blue = 4'd4;
+				green = 4'd1;	
                         end
                         4'b0100:begin
-                            blue = 1;
+                            green = 1;
+                            red = 0;
+                        blue = 0;
                         end
                         default: begin
                         red = 1;
@@ -291,11 +427,9 @@ module Top(
                         end
                      endcase
                 end
-
-            end
-            else begin
-               
-            end
+        end 
+            
         
       end
 endmodule
+

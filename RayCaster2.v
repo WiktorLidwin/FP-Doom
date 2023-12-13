@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+
 module RayCaster2(
     input clk,
     input rst,
@@ -31,6 +32,9 @@ module RayCaster2(
     input [15:0] map_pos_y,
 
     input start,
+    
+    input shot,
+    
     output reg busy,
     output reg done,
 
@@ -40,12 +44,50 @@ module RayCaster2(
     );
     
     reg [7:0] map_rom_x, map_rom_y;
-    wire [3:0] map_point;
-    map_rom map_rom (
-        .x(map_rom_x),
-        .y(map_rom_y),
-        .point(map_point)
-    );
+    
+    reg [3:0] map [5:0][5:0];
+    initial begin
+        map[0][0] = 4'd 1;
+        map[0][1] = 4'd 1;
+        map[0][2] = 4'd 1;
+        map[0][3] = 4'd 1;
+        map[0][4] = 4'd 1;
+        map[0][5] = 4'd 1;
+        
+        map[1][0] = 4'd 1;
+        map[1][1] = 4'd 2;
+        map[1][2] = 4'd 0;
+        map[1][3] = 4'd 0;
+        map[1][4] = 4'd 0;
+        map[1][5] = 4'd 1;
+        
+        map[2][0] = 4'd 1;
+        map[2][1] = 4'd 0;
+        map[2][2] = 4'd 0;
+        map[2][3] = 4'd 0;
+        map[2][4] = 4'd 0;
+        map[2][5] = 4'd 1;
+        
+        map[3][0] = 4'd 1;
+        map[3][1] = 4'd 0;
+        map[3][2] = 4'd 0;
+        map[3][3] = 4'd 0;
+        map[3][4] = 4'd 0;
+        map[3][5] = 4'd 1;
+        
+        map[4][0] = 4'd 1;
+        map[4][1] = 4'd 0;
+        map[4][2] = 4'd 0;
+        map[4][3] = 4'd 0;
+        map[4][4] = 4'd 1;
+        
+        map[5][0] = 4'd 1;
+        map[5][1] = 4'd 1;
+        map[5][2] = 4'd 1;
+        map[5][3] = 4'd 1;
+        map[5][4] = 4'd 1;
+        map[5][5] = 4'd 1;
+    end
     
     reg [8:0] camerax_addr;
     wire [15:0] camerax; // Q2.14
@@ -183,9 +225,15 @@ module RayCaster2(
     end
     
     
+    reg [7:0] last_middle_x, last_middle_y;
     
-    
-    
+    always @(shot)begin
+        if(shot)begin
+            if(map[last_middle_x][last_middle_y] == 2) begin
+                map[last_middle_x][last_middle_y] = 4;
+            end
+        end
+    end
     
     
     always @(*) begin
@@ -415,8 +463,14 @@ module RayCaster2(
                 map_rom_x = map_x_d[15:8];
                 map_rom_y = map_y_d[15:8];
     
-                if (map_point != 4'd0) begin
-                    color_d[3:0] = map_point; // placeholder "color"
+                if (map[map_rom_x][map_rom_y] != 4'd0) begin
+                    color_d[3:0] = map[map_rom_x][map_rom_y]; // placeholder "color"
+                    if(x == 160) begin
+                    
+                    last_middle_x =  map_rom_x;
+                    last_middle_y = map_rom_y;
+                    
+                    end
                     color_d[7] = side_d; // change color depending on side hit
                     state_d = CALC_WALLDIST;
                 end
